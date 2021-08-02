@@ -1,26 +1,38 @@
 {
-	"title": "Bees",
+	"title": "Пчёлы",
 	"icon":{
 		"item": "forestry:bee_combs"
 	},
 	"content": [
 		[
 			{
-				"text": "Bees sting. Bees are yellow and stripy. Bees buzz. You may already know these things, but the first rule of beekeeping is know your enemy (actually the first rule is you must always talk about beekeeping club). Bees are small yellow insects found in hives, scattered around our remarkably polygonal world. There are five different hives I have discovered in this world, and another which I dare not speak about."
+				"text": "Пчёлы жалят. Пчёлы - жёлтые и полосатые. Пчёлы жужжат. Возможно вы уже знаете об этом, но первое правило пчеловодства требует знать своего врага (на самом деле первое правило требует от Вас постоянно говорить о клубе пчеловодства). Пчёлы - это небольшие жёлтые наскеомые, которых можно найти в ульях, разбросанных по нашему невероятно полигональному миру."
 			}
 		],
 		[
 			{
-				"text": "The easiest way to find the hives is to explore at night, as the glow of working bees guided me to them (as well as mobs, as I found to my cost)"
+				"text": "В этом мире я обнаружил пять различных видов ульев, а также ещё один, о котором более не смею говорить."
 			},
 			{
-				"text": "Outside of apiaries and alvearies (more later) bees seem to be both totally docile and immortal. The first thing I noticed about bees were that they were clearly split into three castes. In the hives I found both princess and drones, where the princesses were",
+				"text": "Самый лёгкий способ найти пчёл - это искать их ночью, поскольку свечение работающих пчёл приводило меня к ним (а также и мобов, как я выяснил позднее)",
+				"paragraph": true
+			},
+			{
+				"text": "Вне пасек и ульев (о них позднее) пчёлы выглядят послушными да ещё и бессметрными.",
 				"paragraph": true
 			}
 		],
 		[
 			{
-				"text": "distinguisable by their more regal appearance. But when the two are brought together somewhere special the princess can transform into the queen. The queen will spend her lifespan creating things such as honey combs until she eventually dies, spawning a new princess and multiple drones. This means that your bee population will grow exponentially, meaning you'll need plenty of storage."
+				"text": "Самое первое, что я заметил, наблюдая за пчёлами, так это то, что они делятся на три касты. В ульях я находил как принцесс так и трутней, принцессы в них были отличимы по их более царственному обличию."
+			},
+			{
+				"text": "Однако, если они встретятся особенным образом, то принцесса может превратиться в матку. Матка проведёт весь свой"
+			}
+		],
+		[
+			{
+				"text": "жизненный срок производя различны продукты, такие как медовые соты, пока в конце концов не умрёт, оставив новую принцессу и нескольких трутней. Этот факт предвещает эксмпоненциальный рост вашей колонии пчёл, намекая на необходимость большого хранилища."
 			}
 		]
 	]

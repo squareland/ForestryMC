@@ -1,5 +1,5 @@
 {
-	"title": "Bee Genes",
+	"title": "Пчелиные гены",
 	"icon":{
 		"item": "forestry:bee_larvae_ge",
 		"nbt": "{Genome:{Chromosomes:[{UID1:\"forestry.speciesDiligent\",UID0:\"forestry.speciesDiligent\",Slot:0b}]}}"

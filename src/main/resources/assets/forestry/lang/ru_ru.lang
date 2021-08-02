@@ -143,7 +143,7 @@ for.gui.database.tab.products.name=Продукты
 for.gui.database.tab.mutations.name=Мутации
 for.gui.database.mutations.further=Дальнейшие мутации
 for.gui.database.mutations.resultant=Результирующие мутации
-for.gui.database.support=Этот образец в настоящее время не имеет интеграции на базе.
+for.gui.database.support=Этот образец в данный момент не имеет интеграции с базой данных.
 
 for.gui.blank=Пусто
 for.gui.cave=Пещерная
