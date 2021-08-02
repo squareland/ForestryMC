@@ -1,13 +1,8 @@
 package forestry.core.multiblock;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import forestry.api.multiblock.IMultiblockController;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -212,7 +207,10 @@ public class MultiblockWorldRegistry {
 		// Any controllers which have had parts removed must be checked to see if some parts are no longer
 		// physically connected to their master.
 		if (!dirtyControllers.isEmpty()) {
-			for (IMultiblockControllerInternal controller : dirtyControllers) {
+			Set<IMultiblockControllerInternal> dc = new HashSet<>(dirtyControllers);
+			dirtyControllers.clear();
+
+			for (IMultiblockControllerInternal controller : dc) {
 				if (controller == null) {
 					continue;
 				}
@@ -234,8 +232,6 @@ public class MultiblockWorldRegistry {
 					detachedParts.addAll(newlyDetachedParts);
 				}
 			}
-
-			dirtyControllers.clear();
 		}
 
 		// Unregister dead controllers
