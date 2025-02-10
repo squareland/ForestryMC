@@ -11,6 +11,7 @@
 package forestry.arboriculture.blocks;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -21,9 +22,12 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -38,6 +42,7 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import net.minecraftforge.fml.relauncher.Side;
@@ -80,10 +85,7 @@ public class BlockForestryLeaves extends BlockAbstractLeaves implements ITileEnt
 	protected ITree getTree(IBlockAccess world, BlockPos pos) {
 		TileLeaves leaves = TileUtil.getTile(world, pos, TileLeaves.class);
 		if (leaves != null) {
-			ITree tree = leaves.getTree();
-			if (tree != null) {
-				return tree;
-			}
+			return leaves.getTree();
 		}
 
 		return null;
@@ -156,6 +158,38 @@ public class BlockForestryLeaves extends BlockAbstractLeaves implements ITileEnt
 		// Add fruits
 		if (tile.hasFruit()) {
 			drops.addAll(tree.produceStacks(world, pos, tile.getRipeningTime()));
+		}
+	}
+
+	@Override
+	public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack) {
+		if (te instanceof TileLeaves) {
+			TileLeaves leaves = (TileLeaves) te;
+			ITree tree = leaves.getTree();
+			player.addStat(StatList.getBlockStats(this));
+			player.addExhaustion(0.005F);
+			if (EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
+				List<ItemStack> items = new ArrayList<>();
+				if (tree != null) {
+					ItemStack drop = tree.getGenome().getDecorativeLeaves();
+					if (!drop.isEmpty()) {
+						items.add(drop);
+					}
+				}
+
+				ForgeEventFactory.fireBlockHarvesting(items, world, pos, state, 0, 1.0F, true, player);
+
+				for (ItemStack item : items) {
+					spawnAsEntity(world, pos, item);
+				}
+			} else {
+				this.harvesters.set(player);
+				int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
+				this.dropBlockAsItem(world, pos, state, i);
+				this.harvesters.set(null);
+			}
+		} else {
+			super.harvestBlock(world, player, pos, state, te, stack);
 		}
 	}
 
