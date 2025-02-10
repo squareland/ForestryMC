@@ -73,7 +73,7 @@ public class PacketHandler {
 			threadListener.addScheduledTask(() -> {
 				try {
 					EntityPlayer player = Minecraft.getMinecraft().player;
-					Preconditions.checkNotNull(player, "Tried to send data to client before the player exists.");
+					Preconditions.checkNotNull(player, "Tried to send data to client before the player exists: " + packet.getClass());
 					packet.onPacketData(data, player);
 					data.release();
 				} catch (IOException e) {
