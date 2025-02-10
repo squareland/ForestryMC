@@ -1,7 +1,7 @@
 buildscript {
 	repositories {
 		jcenter()
-		maven { url = "http://files.minecraftforge.net/maven" }
+		maven { url = "https://files.minecraftforge.net/maven" }
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
@@ -41,18 +41,15 @@ minecraft {
 
 repositories {
 	maven {
-		url = 'http://maven.mcmoddev.com'
+		name "ModMaven"
+		url "https://modmaven.dev"
 	}
 	maven {
-		url "http://dvs1.progwml6.com/files/maven"
-	}
-	maven {
-		name = "ic2"
-		url = "http://maven.ic2.player.to/"
+		url "https://dvs1.progwml6.com/files/maven"
 	}
 	maven {
 		name = "Modmuss50"
-		url = "http://maven.modmuss50.me"
+		url = "https://maven.modmuss50.me"
 	}
 	maven {
 		url = 'https://mod-buildcraft.com/maven'
