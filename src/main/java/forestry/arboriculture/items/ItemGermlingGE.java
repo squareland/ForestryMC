@@ -12,6 +12,9 @@ package forestry.arboriculture.items;
 
 import javax.annotation.Nullable;
 
+import forestry.arboriculture.ModuleArboriculture;
+import forestry.arboriculture.blocks.BlockRegistryArboriculture;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -19,12 +22,8 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 import net.minecraftforge.fml.relauncher.Side;
@@ -139,80 +138,80 @@ public class ItemGermlingGE extends ItemGE implements IVariableFermentable, ICol
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, true);
-
-		ItemStack itemStack = playerIn.getHeldItem(handIn);
-
-		if (raytraceresult != null && raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK) {
-			BlockPos pos = raytraceresult.getBlockPos();
-
-			ITree tree = TreeManager.treeRoot.getMember(itemStack);
-			if (tree != null) {
-				if (type == EnumGermlingType.SAPLING) {
-					return onItemRightClickSapling(itemStack, worldIn, playerIn, pos, tree);
-				} else if (type == EnumGermlingType.POLLEN) {
-					return onItemRightClickPollen(itemStack, worldIn, playerIn, pos, tree);
-				}
-			}
+	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+		IBlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+		if (!block.isReplaceable(world, pos)) {
+			pos = pos.offset(side);
 		}
-		return new ActionResult<>(EnumActionResult.PASS, itemStack);
+
+		ItemStack item = player.getHeldItem(hand);
+		ITree tree = TreeManager.treeRoot.getMember(item);
+		if (!item.isEmpty() && tree != null && player.canPlayerEdit(pos, side, item)) {
+			if (type == EnumGermlingType.SAPLING) {
+				return onItemUseSapling(item, world, player, pos, tree, side);
+			} else if (type == EnumGermlingType.POLLEN) {
+				return onItemUsePollen(item, world, player, pos, tree, side);
+			}
+
+			return EnumActionResult.SUCCESS;
+		} else {
+			return EnumActionResult.FAIL;
+		}
 	}
 
-
-	private static ActionResult<ItemStack> onItemRightClickPollen(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, BlockPos pos, ITree tree) {
-		ICheckPollinatable checkPollinatable = GeneticsUtil.getCheckPollinatable(worldIn, pos);
+	private static EnumActionResult onItemUsePollen(ItemStack item, World world, EntityPlayer player, BlockPos pos, ITree tree, EnumFacing side) {
+		ICheckPollinatable checkPollinatable = GeneticsUtil.getCheckPollinatable(world, pos);
 		if (checkPollinatable == null || !checkPollinatable.canMateWith(tree)) {
-			return new ActionResult<>(EnumActionResult.FAIL, itemStackIn);
+			return EnumActionResult.PASS;
 		}
 
-		IPollinatable pollinatable = GeneticsUtil.getOrCreatePollinatable(playerIn.getGameProfile(), worldIn, pos, true);
+		IPollinatable pollinatable = GeneticsUtil.getOrCreatePollinatable(player.getGameProfile(), world, pos, true);
 		if (pollinatable == null || !pollinatable.canMateWith(tree)) {
-			return new ActionResult<>(EnumActionResult.FAIL, itemStackIn);
+			return EnumActionResult.PASS;
 		}
 
-		if (worldIn.isRemote) {
-			return new ActionResult<>(EnumActionResult.SUCCESS, itemStackIn);
-		} else {
+		if (!world.isRemote) {
 			pollinatable.mateWith(tree);
 
-			IBlockState blockState = worldIn.getBlockState(pos);
+			IBlockState blockState = world.getBlockState(pos);
 			PacketFXSignal packet = new PacketFXSignal(PacketFXSignal.VisualFXType.BLOCK_BREAK, PacketFXSignal.SoundFXType.BLOCK_BREAK, pos, blockState);
-			NetworkUtil.sendNetworkPacket(packet, pos, worldIn);
+			NetworkUtil.sendNetworkPacket(packet, pos, world);
 
-			if (!playerIn.capabilities.isCreativeMode) {
-				itemStackIn.shrink(1);
+			if (!player.capabilities.isCreativeMode) {
+				item.shrink(1);
 			}
-			return new ActionResult<>(EnumActionResult.SUCCESS, itemStackIn);
 		}
+		return EnumActionResult.SUCCESS;
 	}
 
 
-	private static ActionResult<ItemStack> onItemRightClickSapling(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, BlockPos pos, ITree tree) {
+	private static EnumActionResult onItemUseSapling(ItemStack item, World world, EntityPlayer player, BlockPos pos, ITree tree, EnumFacing side) {
 		// x, y, z are the coordinates of the block "hit", can thus either be the soil or tall grass, etc.
-		IBlockState hitBlock = worldIn.getBlockState(pos);
-		if (!hitBlock.getBlock().isReplaceable(worldIn, pos)) {
-			if (!worldIn.isAirBlock(pos.up())) {
-				return new ActionResult<>(EnumActionResult.FAIL, itemStackIn);
+		IBlockState hitBlock = world.getBlockState(pos);
+		if (!hitBlock.getBlock().isReplaceable(world, pos)) {
+			if (!world.isAirBlock(pos.up())) {
+				return EnumActionResult.PASS;
 			}
 			pos = pos.up();
 		}
 
-		if (tree.canStay(worldIn, pos)) {
-			if (TreeManager.treeRoot.plantSapling(worldIn, tree, playerIn.getGameProfile(), pos)) {
-				if (!playerIn.capabilities.isCreativeMode) {
-					itemStackIn.shrink(1);
+		BlockRegistryArboriculture blocks = ModuleArboriculture.getBlocks();
+		if (tree.canStay(world, pos) && world.mayPlace(blocks.saplingGE, pos, false, side, player)) {
+			if (TreeManager.treeRoot.plantSapling(world, tree, player.getGameProfile(), pos)) {
+				if (!player.capabilities.isCreativeMode) {
+					item.shrink(1);
 				}
-				return new ActionResult<>(EnumActionResult.SUCCESS, itemStackIn);
+				return EnumActionResult.SUCCESS;
 			}
 		}
-		return new ActionResult<>(EnumActionResult.FAIL, itemStackIn);
+		return EnumActionResult.PASS;
 	}
 
 	@Override
-	public float getFermentationModifier(ItemStack itemstack) {
-		itemstack = GeneticsUtil.convertToGeneticEquivalent(itemstack);
-		ITree tree = TreeManager.treeRoot.getMember(itemstack);
+	public float getFermentationModifier(ItemStack item) {
+		item = GeneticsUtil.convertToGeneticEquivalent(item);
+		ITree tree = TreeManager.treeRoot.getMember(item);
 		if (tree == null) {
 			return 1.0f;
 		}
